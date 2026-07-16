@@ -1,5 +1,6 @@
 import ModeToggle from "@/components/ModeToggle";
 import { Button } from "@/components/ui/button";
+import prisma from "@/lib/prisma";
 import {
   SignedIn,
   SignedOut,
@@ -10,8 +11,8 @@ import {
 
 export default function Home() {
   return (
-    <div>
-
+    <div className="m-4">
+      <h1>home page comp</h1>
     </div>
   );
 }
