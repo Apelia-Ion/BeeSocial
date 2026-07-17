@@ -56,11 +56,90 @@ export async function getDbUserId() {
   const { userId: clerkId } = await auth();
   if (!clerkId) return null;
 
-  const user = await getUserByClerkId(clerkId);
+  let user = await getUserByClerkId(clerkId);
 
-  if (!user) throw new Error("User not found");
+  if (!user) {
+    await syncUser();
+    user = await getUserByClerkId(clerkId);
+  }
 
-  return user.id;
+  return user?.id ?? null;
+}
+
+export async function getUserByUsername(username: string) {
+  return prisma.user.findUnique({
+    where: { username },
+    include: {
+      _count: {
+        select: {
+          followers: true,
+          following: true,
+          posts: true,
+        },
+      },
+      posts: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              username: true,
+            },
+          },
+          comments: {
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                  image: true,
+                  name: true,
+                },
+              },
+            },
+            orderBy: {
+              createdAt: "asc",
+            },
+          },
+          likes: {
+            select: {
+              userId: true,
+            },
+          },
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+export async function isFollowing(targetUserId: string) {
+  try {
+    const userId = await getDbUserId();
+    if (!userId) return false;
+
+    const follow = await prisma.follows.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: userId,
+          followingId: targetUserId,
+        },
+      },
+    });
+
+    return !!follow;
+  } catch {
+    return false;
+  }
 }
 
 export async function getRandomUsers() {
@@ -154,6 +233,7 @@ export async function toggleFollow(targetUserId: string) {
     }
 
     revalidatePath("/");
+    revalidatePath("/notifications");
     return { success: true };
   } catch (error) {
     console.log("Error in toggleFollow", error);

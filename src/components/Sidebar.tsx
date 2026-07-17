@@ -1,22 +1,23 @@
 import { SignInButton, SignUpButton } from '@clerk/nextjs'
 import { currentUser } from '@clerk/nextjs/server'
-import React from 'react'
-import { Button } from './button'
-import { Card, CardContent, CardHeader, CardTitle } from './card'
-import { getUserByClerkId } from '@/actions/user.action'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getUserByClerkId, syncUser } from '@/actions/user.action'
 import Link from 'next/link'
-import { Avatar, AvatarImage } from './avatar'
-import { Separator } from './separator'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
 import { LinkIcon, MapPinIcon } from 'lucide-react'
 
 async function Sidebar() {
-  
     const authUser = await currentUser();
     if(!authUser) return <UnAuthenticatedSidebar/>;
     
-    const user = await getUserByClerkId(authUser.id);
-    if (!user) return null
-    console.log({user});
+    let user = await getUserByClerkId(authUser.id);
+    if (!user) {
+      await syncUser();
+      user = await getUserByClerkId(authUser.id);
+    }
+    if (!user) return <UnAuthenticatedSidebar/>;
 
      return (
     <div className="sticky top-20">
