@@ -1,26 +1,47 @@
 "use client";
 
+import { XIcon } from "lucide-react";
+import { UploadDropzone } from "@/lib/uploadthing";
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
+
 type ImageUploadProps = {
-  endpoint: string;
+  endpoint: keyof OurFileRouter;
   value: string;
   onChange: (url: string) => void;
 };
 
-function ImageUpload({ value, onChange }: ImageUploadProps) {
+function ImageUpload({ endpoint, value, onChange }: ImageUploadProps) {
+  if (value) {
+    return (
+      <div className="relative size-40">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={value}
+          alt="Upload preview"
+          className="size-40 rounded-md object-cover"
+        />
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="absolute top-0 right-0 rounded-full bg-red-500 p-1 shadow-sm"
+          aria-label="Remove image"
+        >
+          <XIcon className="size-4 text-white" />
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-2">
-      <input
-        type="url"
-        placeholder="Paste image URL"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-      />
-      {value ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={value} alt="Upload preview" className="max-h-48 rounded-lg object-cover" />
-      ) : null}
-    </div>
+    <UploadDropzone
+      endpoint={endpoint}
+      onClientUploadComplete={(res) => {
+        onChange(res?.[0]?.ufsUrl ?? "");
+      }}
+      onUploadError={(error: Error) => {
+        console.error(error);
+      }}
+    />
   );
 }
 
