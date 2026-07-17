@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Navbar from "@/components/Navbar/Navbar";
 import Sidebar from "@/components/Sidebar";
 import { Toaster } from "react-hot-toast";
+import { LanguageProvider } from "@/i18n/LanguageProvider";
+import { getLocale } from "@/i18n/server";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,7 +23,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "BeeSocial",
-  description: "Social media app powered by Next.js",
+  description: "The social hive – share what's buzzing.",
 };
 
 export default function RootLayout({
@@ -29,9 +31,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = getLocale();
+
   return (
-    <ClerkProvider >
-      <html lang="en" suppressHydrationWarning className={cn("font-sans", geistSans.variable)}>
+    <ClerkProvider>
+      <html
+        lang={locale}
+        suppressHydrationWarning
+        className={cn("font-sans", geistSans.variable)}
+      >
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
@@ -41,20 +49,22 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="min-h-screen">
-              <Navbar />
-              <main className="py-8">
-                <div className="max-w-7xl mx-auto px-4">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="hidden lg:block lg:col-span-3">
-                      <Sidebar />
+            <LanguageProvider initialLocale={locale}>
+              <div className="min-h-screen bg-honeycomb">
+                <Navbar />
+                <main className="py-8">
+                  <div className="max-w-7xl mx-auto px-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      <div className="hidden lg:block lg:col-span-3">
+                        <Sidebar />
+                      </div>
+                      <div className="lg:col-span-9">{children}</div>
                     </div>
-                    <div className="lg:col-span-9">{children}</div>
                   </div>
-                </div>
-              </main>
-            </div>
-            <Toaster/>
+                </main>
+              </div>
+              <Toaster />
+            </LanguageProvider>
           </ThemeProvider>
         </body>
       </html>

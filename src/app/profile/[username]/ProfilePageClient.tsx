@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/i18n/LanguageProvider";
 import { LinkIcon, MapPinIcon, PencilIcon } from "lucide-react";
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
@@ -47,6 +48,7 @@ function ProfilePageClient({
   isFollowing,
   dbUserId,
 }: ProfilePageClientProps) {
+  const { t } = useTranslation();
   const isOwnProfile = dbUserId === user.id;
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -55,20 +57,20 @@ function ProfilePageClient({
     startTransition(async () => {
       const result = await updateProfile(formData);
       if (result?.success) {
-        toast.success("Profile updated");
+        toast.success(t("profile.updated"));
         setIsEditOpen(false);
       } else {
-        toast.error("Failed to update profile");
+        toast.error(t("profile.updateError"));
       }
     });
   };
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="border-primary/30">
         <CardContent className="pt-6">
           <div className="flex flex-col items-center text-center">
-            <Avatar className="w-24 h-24 border-2">
+            <Avatar className="w-24 h-24 border-2 border-primary">
               <AvatarImage src={user.image ?? "/avatar.png"} />
             </Avatar>
 
@@ -86,16 +88,16 @@ function ProfilePageClient({
                 <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                   <DialogTrigger render={<Button variant="outline" size="sm" />}>
                     <PencilIcon className="size-4 mr-2" />
-                    Edit Profile
+                    {t("profile.editProfile")}
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Edit Profile</DialogTitle>
+                      <DialogTitle>{t("profile.editTitle")}</DialogTitle>
                     </DialogHeader>
                     <form action={handleUpdateProfile} className="space-y-4">
                       <div className="space-y-2">
                         <label htmlFor="name" className="text-sm font-medium">
-                          Name
+                          {t("profile.name")}
                         </label>
                         <Input
                           id="name"
@@ -106,18 +108,18 @@ function ProfilePageClient({
                       </div>
                       <div className="space-y-2">
                         <label htmlFor="bio" className="text-sm font-medium">
-                          Bio
+                          {t("profile.bio")}
                         </label>
                         <Textarea
                           id="bio"
                           name="bio"
                           defaultValue={user.bio ?? ""}
-                          className="min-h-[80px]"
+                          className="min-h-comment-box"
                         />
                       </div>
                       <div className="space-y-2">
                         <label htmlFor="location" className="text-sm font-medium">
-                          Location
+                          {t("profile.location")}
                         </label>
                         <Input
                           id="location"
@@ -127,7 +129,7 @@ function ProfilePageClient({
                       </div>
                       <div className="space-y-2">
                         <label htmlFor="website" className="text-sm font-medium">
-                          Website
+                          {t("profile.website")}
                         </label>
                         <Input
                           id="website"
@@ -137,10 +139,10 @@ function ProfilePageClient({
                       </div>
                       <DialogFooter>
                         <DialogClose render={<Button variant="outline" type="button" />}>
-                          Cancel
+                          {t("profile.cancel")}
                         </DialogClose>
                         <Button type="submit" disabled={isPending}>
-                          {isPending ? "Saving..." : "Save"}
+                          {isPending ? t("profile.saving") : t("profile.save")}
                         </Button>
                       </DialogFooter>
                     </form>
@@ -156,15 +158,21 @@ function ProfilePageClient({
               <div className="flex justify-around">
                 <div>
                   <p className="font-medium">{user._count.following}</p>
-                  <p className="text-xs text-muted-foreground">Following</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("profile.following")}
+                  </p>
                 </div>
                 <div>
                   <p className="font-medium">{user._count.followers}</p>
-                  <p className="text-xs text-muted-foreground">Followers</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("profile.followers")}
+                  </p>
                 </div>
                 <div>
                   <p className="font-medium">{user._count.posts}</p>
-                  <p className="text-xs text-muted-foreground">Posts</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("profile.posts")}
+                  </p>
                 </div>
               </div>
               <Separator className="my-4" />
@@ -173,7 +181,7 @@ function ProfilePageClient({
             <div className="w-full max-w-sm space-y-2 text-sm text-left">
               <div className="flex items-center text-muted-foreground">
                 <MapPinIcon className="w-4 h-4 mr-2 shrink-0" />
-                {user.location || "No location"}
+                {user.location || t("sidebar.noLocation")}
               </div>
               <div className="flex items-center text-muted-foreground">
                 <LinkIcon className="w-4 h-4 mr-2 shrink-0" />
@@ -191,7 +199,7 @@ function ProfilePageClient({
                     {user.website}
                   </a>
                 ) : (
-                  "No website"
+                  t("sidebar.noWebsite")
                 )}
               </div>
             </div>
@@ -201,12 +209,14 @@ function ProfilePageClient({
 
       <Tabs defaultValue="posts">
         <TabsList>
-          <TabsTrigger value="posts">Posts</TabsTrigger>
-          <TabsTrigger value="likes">Likes</TabsTrigger>
+          <TabsTrigger value="posts">{t("profile.posts")}</TabsTrigger>
+          <TabsTrigger value="likes">{t("profile.likes")}</TabsTrigger>
         </TabsList>
         <TabsContent value="posts" className="space-y-6 mt-6">
           {posts.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No posts yet.</p>
+            <p className="text-center text-muted-foreground py-8">
+              {t("profile.noPosts")}
+            </p>
           ) : (
             posts.map((post) => (
               <PostCard key={post.id} post={post} dbUserId={dbUserId} />
@@ -215,7 +225,9 @@ function ProfilePageClient({
         </TabsContent>
         <TabsContent value="likes" className="space-y-6 mt-6">
           {likedPosts.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No liked posts yet.</p>
+            <p className="text-center text-muted-foreground py-8">
+              {t("profile.noLikedPosts")}
+            </p>
           ) : (
             likedPosts.map((post) => (
               <PostCard key={post.id} post={post} dbUserId={dbUserId} />

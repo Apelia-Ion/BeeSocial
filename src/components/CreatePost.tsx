@@ -10,9 +10,11 @@ import { Button } from "./ui/button";
 import { createPost } from "@/actions/post.action";
 import toast from "react-hot-toast";
 import ImageUpload from "./ImageUpload";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 function CreatePost() {
   const { user } = useUser();
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [isPosting, setIsPosting] = useState(false);
@@ -30,27 +32,27 @@ function CreatePost() {
         setImageUrl("");
         setShowImageUpload(false);
 
-        toast.success("Post created successfully");
+        toast.success(t("createPost.success"));
       }
     } catch (error) {
       console.error("Failed to create post:", error);
-      toast.error("Failed to create post");
+      toast.error(t("createPost.error"));
     } finally {
       setIsPosting(false);
     }
   };
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 border-primary/30">
       <CardContent className="pt-6">
         <div className="space-y-4">
           <div className="flex space-x-4">
-            <Avatar className="w-10 h-10">
+            <Avatar className="w-10 h-10 border-2 border-primary">
               <AvatarImage src={user?.imageUrl || "/avatar.png"} />
             </Avatar>
             <Textarea
-              placeholder="What's on your mind?"
-              className="min-h-[100px] resize-none border-none focus-visible:ring-0 p-0 text-base"
+              placeholder={t("createPost.placeholder")}
+              className="min-h-post-box resize-none border-none focus-visible:ring-0 p-0 text-base"
               value={content}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
               disabled={isPosting}
@@ -76,12 +78,12 @@ function CreatePost() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-primary"
+                className="text-muted-foreground hover:text-honey-600 dark:hover:text-honey-400"
                 onClick={() => setShowImageUpload(!showImageUpload)}
                 disabled={isPosting}
               >
                 <ImageIcon className="size-4 mr-2" />
-                Photo
+                {t("createPost.photo")}
               </Button>
             </div>
             <Button
@@ -92,12 +94,12 @@ function CreatePost() {
               {isPosting ? (
                 <>
                   <Loader2Icon className="size-4 mr-2 animate-spin" />
-                  Posting...
+                  {t("createPost.posting")}
                 </>
               ) : (
                 <>
                   <SendIcon className="size-4 mr-2" />
-                  Post
+                  {t("createPost.post")}
                 </>
               )}
             </Button>

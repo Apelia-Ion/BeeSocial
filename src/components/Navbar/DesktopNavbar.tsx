@@ -3,14 +3,18 @@ import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import ModeToggle from "@/components/ModeToggle";
+import LanguageToggle from "@/components/LanguageToggle";
 import { currentUser } from "@clerk/nextjs/server";
 import { cn } from "@/lib/utils";
+import { getTranslations } from "@/i18n/server";
 
 async function DesktopNavbar() {
   const user = await currentUser();
+  const { t } = getTranslations();
 
   return (
     <div className="hidden md:flex items-center space-x-4">
+      <LanguageToggle />
       <ModeToggle />
 
       <Link
@@ -18,7 +22,7 @@ async function DesktopNavbar() {
         className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2")}
       >
         <HomeIcon className="w-4 h-4" />
-        <span className="hidden lg:inline">Home</span>
+        <span className="hidden lg:inline">{t("nav.home")}</span>
       </Link>
 
       {user ? (
@@ -28,7 +32,7 @@ async function DesktopNavbar() {
             className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2")}
           >
             <BellIcon className="w-4 h-4" />
-            <span className="hidden lg:inline">Notifications</span>
+            <span className="hidden lg:inline">{t("nav.notifications")}</span>
           </Link>
           <Link
             href={`/profile/${
@@ -37,14 +41,14 @@ async function DesktopNavbar() {
             className={cn(buttonVariants({ variant: "ghost" }), "flex items-center gap-2")}
           >
             <UserIcon className="w-4 h-4" />
-            <span className="hidden lg:inline">Profile</span>
+            <span className="hidden lg:inline">{t("nav.profile")}</span>
           </Link>
           <UserButton />
         </>
       ) : (
         <SignInButton mode="modal">
           <button className={cn(buttonVariants({ variant: "default" }))}>
-            Sign In
+            {t("nav.signIn")}
           </button>
         </SignInButton>
       )}

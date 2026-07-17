@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2Icon } from "lucide-react";
 import toast from "react-hot-toast";
 import { toggleFollow } from "@/actions/user.action";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 type FollowButtonProps = {
   userId: string;
@@ -12,6 +13,7 @@ type FollowButtonProps = {
 };
 
 function FollowButton({ userId, isFollowing = false }: FollowButtonProps) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [following, setFollowing] = useState(isFollowing);
 
@@ -22,12 +24,12 @@ function FollowButton({ userId, isFollowing = false }: FollowButtonProps) {
       const result = await toggleFollow(userId);
       if (result?.success) {
         setFollowing((prev) => !prev);
-        toast.success(following ? "Unfollowed user" : "Followed user");
+        toast.success(following ? t("follow.unfollowed") : t("follow.followed"));
       } else {
-        toast.error("Error updating follow status");
+        toast.error(t("follow.error"));
       }
     } catch {
-      toast.error("Error updating follow status");
+      toast.error(t("follow.error"));
     } finally {
       setIsLoading(false);
     }
@@ -36,7 +38,7 @@ function FollowButton({ userId, isFollowing = false }: FollowButtonProps) {
   return (
     <Button
       size="sm"
-      variant={following ? "outline" : "secondary"}
+      variant={following ? "outline" : "default"}
       onClick={handleFollow}
       disabled={isLoading}
       className="w-24"
@@ -44,9 +46,9 @@ function FollowButton({ userId, isFollowing = false }: FollowButtonProps) {
       {isLoading ? (
         <Loader2Icon className="size-4 animate-spin" />
       ) : following ? (
-        "Unfollow"
+        t("follow.unfollow")
       ) : (
-        "Follow"
+        t("follow.follow")
       )}
     </Button>
   );

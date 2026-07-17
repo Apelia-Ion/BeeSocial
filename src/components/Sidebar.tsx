@@ -1,34 +1,37 @@
-import { SignInButton, SignUpButton } from '@clerk/nextjs'
-import { currentUser } from '@clerk/nextjs/server'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getUserByClerkId, syncUser } from '@/actions/user.action'
-import Link from 'next/link'
-import { Avatar, AvatarImage } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
-import { LinkIcon, MapPinIcon } from 'lucide-react'
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getUserByClerkId, syncUser } from "@/actions/user.action";
+import Link from "next/link";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { LinkIcon, MapPinIcon } from "lucide-react";
+import { getTranslations } from "@/i18n/server";
 
 async function Sidebar() {
-    const authUser = await currentUser();
-    if(!authUser) return <UnAuthenticatedSidebar/>;
-    
-    let user = await getUserByClerkId(authUser.id);
-    if (!user) {
-      await syncUser();
-      user = await getUserByClerkId(authUser.id);
-    }
-    if (!user) return <UnAuthenticatedSidebar/>;
+  const authUser = await currentUser();
+  if (!authUser) return <UnAuthenticatedSidebar />;
 
-     return (
+  let user = await getUserByClerkId(authUser.id);
+  if (!user) {
+    await syncUser();
+    user = await getUserByClerkId(authUser.id);
+  }
+  if (!user) return <UnAuthenticatedSidebar />;
+
+  const { t } = getTranslations();
+
+  return (
     <div className="sticky top-20">
-      <Card>
+      <Card className="border-primary/30">
         <CardContent className="pt-6">
           <div className="flex flex-col items-center text-center">
             <Link
               href={`/profile/${user.username}`}
               className="flex flex-col items-center justify-center"
             >
-              <Avatar className="w-20 h-20 border-2 ">
+              <Avatar className="w-20 h-20 border-2 border-primary">
                 <AvatarImage src={user.image || "/avatar.png"} />
               </Avatar>
 
@@ -45,12 +48,16 @@ async function Sidebar() {
               <div className="flex justify-between">
                 <div>
                   <p className="font-medium">{user._count.following}</p>
-                  <p className="text-xs text-muted-foreground">Following</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("sidebar.following")}
+                  </p>
                 </div>
                 <Separator orientation="vertical" />
                 <div>
                   <p className="font-medium">{user._count.followers}</p>
-                  <p className="text-xs text-muted-foreground">Followers</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("sidebar.followers")}
+                  </p>
                 </div>
               </div>
               <Separator className="my-4" />
@@ -59,7 +66,7 @@ async function Sidebar() {
             <div className="w-full space-y-2 text-sm">
               <div className="flex items-center text-muted-foreground">
                 <MapPinIcon className="w-4 h-4 mr-2" />
-                {user.location || "No location"}
+                {user.location || t("sidebar.noLocation")}
               </div>
               <div className="flex items-center text-muted-foreground">
                 <LinkIcon className="w-4 h-4 mr-2 shrink-0" />
@@ -68,7 +75,7 @@ async function Sidebar() {
                     {user.website}
                   </a>
                 ) : (
-                  "No website"
+                  t("sidebar.noWebsite")
                 )}
               </div>
             </div>
@@ -79,30 +86,35 @@ async function Sidebar() {
   );
 }
 
-export default Sidebar
+export default Sidebar;
 
+const UnAuthenticatedSidebar = () => {
+  const { t } = getTranslations();
 
-const UnAuthenticatedSidebar = () => (
-  <div className="sticky top-20">
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-center text-xl font-semibold">Welcome Back!</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-center text-muted-foreground mb-4">
-          Login to access your profile and connect with others.
-        </p>
-        <SignInButton mode="modal">
-          <Button className="w-full" variant="outline">
-            Login
-          </Button>
-        </SignInButton>
-        <SignUpButton mode="modal">
-          <Button className="w-full mt-2" variant="default">
-            Sign Up
-          </Button>
-        </SignUpButton>
-      </CardContent>
-    </Card>
-  </div>
-);
+  return (
+    <div className="sticky top-20">
+      <Card className="border-primary/30">
+        <CardHeader>
+          <CardTitle className="text-center text-xl font-semibold">
+            {t("sidebar.welcome")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-muted-foreground mb-4">
+            {t("sidebar.loginPrompt")}
+          </p>
+          <SignInButton mode="modal">
+            <Button className="w-full" variant="outline">
+              {t("sidebar.login")}
+            </Button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <Button className="w-full mt-2" variant="default">
+              {t("sidebar.signUp")}
+            </Button>
+          </SignUpButton>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

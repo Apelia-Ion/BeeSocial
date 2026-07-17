@@ -12,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Loader2Icon, Trash2Icon } from "lucide-react";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 type DeleteAlertDialogProps = {
   isDeleting: boolean;
@@ -19,6 +20,8 @@ type DeleteAlertDialogProps = {
 };
 
 export function DeleteAlertDialog({ isDeleting, onDelete }: DeleteAlertDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <AlertDialog>
       <AlertDialogTrigger
@@ -30,19 +33,19 @@ export function DeleteAlertDialog({ isDeleting, onDelete }: DeleteAlertDialogPro
         ) : (
           <Trash2Icon className="size-4" />
         )}
-        <span className="sr-only">Delete post</span>
+        <span className="sr-only">{t("deleteDialog.label")}</span>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete post?</AlertDialogTitle>
+          <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your post.
+            {t("deleteDialog.description")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("deleteDialog.cancel")}</AlertDialogCancel>
           <AlertDialogAction onClick={onDelete} disabled={isDeleting}>
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting ? t("deleteDialog.deleting") : t("deleteDialog.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

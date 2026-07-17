@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getTranslations } from "@/i18n/server";
 import { headers } from "next/headers";
 
 type Task = {
@@ -25,18 +26,19 @@ async function getTasks(): Promise<Task[]> {
 
 export default async function TasksPage() {
   const tasks = await getTasks();
+  const { t } = getTranslations();
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Tasks</h1>
+      <h1 className="text-2xl font-bold">{t("tasks.title")}</h1>
 
-      <Card>
+      <Card className="border-primary/30">
         <CardHeader>
-          <CardTitle>Your tasks</CardTitle>
+          <CardTitle>{t("tasks.yourTasks")}</CardTitle>
         </CardHeader>
         <CardContent>
           {tasks.length === 0 ? (
-            <p className="text-muted-foreground">No tasks yet.</p>
+            <p className="text-muted-foreground">{t("tasks.empty")}</p>
           ) : (
             <ul className="space-y-2">
               {tasks.map((task) => (
@@ -48,7 +50,7 @@ export default async function TasksPage() {
                     {task.title}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {task.completed ? "Done" : "Pending"}
+                    {task.completed ? t("tasks.done") : t("tasks.pending")}
                   </span>
                 </li>
               ))}

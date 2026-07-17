@@ -12,12 +12,15 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/i18n/LanguageProvider";
+import { dateLocales } from "@/i18n/translations";
 
 type Posts = Awaited<ReturnType<typeof getPosts>>;
 type Post = Posts[number];
 
 function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
   const { user } = useUser();
+  const { t, locale } = useTranslation();
   const [newComment, setNewComment] = useState("");
   const [isCommenting, setIsCommenting] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
@@ -27,6 +30,9 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
   );
   const [optimisticLikes, setOptmisticLikes] = useState(post._count.likes);
   const [showComments, setShowComments] = useState(false);
+
+  const timeAgo = (date: Date) =>
+    formatDistanceToNow(date, { addSuffix: true, locale: dateLocales[locale] });
 
   const handleLike = async () => {
     if (isLiking) return;
@@ -49,11 +55,11 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
       setIsCommenting(true);
       const result = await createComment(post.id, newComment);
       if (result?.success) {
-        toast.success("Comment posted successfully");
+        toast.success(t("post.commentSuccess"));
         setNewComment("");
       }
     } catch {
-      toast.error("Failed to add comment");
+      toast.error(t("post.commentError"));
     } finally {
       setIsCommenting(false);
     }
@@ -64,22 +70,22 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
     try {
       setIsDeleting(true);
       const result = await deletePost(post.id);
-      if (result?.success) toast.success("Post deleted successfully");
+      if (result?.success) toast.success(t("post.deleteSuccess"));
       else throw new Error(result?.error);
     } catch {
-      toast.error("Failed to delete post");
+      toast.error(t("post.deleteError"));
     } finally {
       setIsDeleting(false);
     }
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden border-primary/30">
       <CardContent className="p-4 sm:p-6">
         <div className="space-y-4">
           <div className="flex space-x-3 sm:space-x-4">
             <Link href={`/profile/${post.author.username}`}>
-              <Avatar className="size-8 sm:w-10 sm:h-10">
+              <Avatar className="size-8 sm:w-10 sm:h-10 border-2 border-primary">
                 <AvatarImage src={post.author.image ?? "/avatar.png"} />
               </Avatar>
             </Link>
@@ -98,7 +104,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                       @{post.author.username}
                     </Link>
                     <span>•</span>
-                    <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>
+                    <span>{timeAgo(new Date(post.createdAt))}</span>
                   </div>
                 </div>
                 {dbUserId === post.author.id && (
@@ -115,10 +121,10 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
           </div>
 
           {post.image ? (
-            <div className="rounded-lg overflow-hidden">
+            <div className="rounded-lg overflow-hidden border border-primary/30">
               <img
                 src={post.image}
-                alt="Post content"
+                alt={t("post.imageAlt")}
                 className="w-full h-auto object-cover"
               />
             </div>
@@ -153,11 +159,15 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
             <Button
               variant="ghost"
               size="sm"
-              className="text-muted-foreground gap-2 hover:text-blue-500"
+              className="text-muted-foreground gap-2 hover:text-honey-600 dark:hover:text-honey-400"
               onClick={() => setShowComments((prev) => !prev)}
             >
               <MessageCircleIcon
-                className={`size-5 ${showComments ? "fill-blue-500 text-blue-500" : ""}`}
+                className={`size-5 ${
+                  showComments
+                    ? "fill-honey-500 text-honey-600 dark:text-honey-400"
+                    : ""
+                }`}
               />
               <span>{post.comments.length}</span>
             </Button>
@@ -179,7 +189,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                         </span>
                         <span className="text-sm text-muted-foreground">·</span>
                         <span className="text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(comment.createdAt))} ago
+                          {timeAgo(new Date(comment.createdAt))}
                         </span>
                       </div>
                       <p className="text-sm break-words">{comment.content}</p>
@@ -195,10 +205,10 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                   </Avatar>
                   <div className="flex-1">
                     <Textarea
-                      placeholder="Write a comment..."
+                      placeholder={t("post.commentPlaceholder")}
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      className="min-h-[80px] resize-none"
+                      className="min-h-comment-box resize-none"
                     />
                     <div className="flex justify-end mt-2">
                       <Button
@@ -208,11 +218,11 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                         disabled={!newComment.trim() || isCommenting}
                       >
                         {isCommenting ? (
-                          "Posting..."
+                          t("post.commenting")
                         ) : (
                           <>
                             <SendIcon className="size-4" />
-                            Comment
+                            {t("post.comment")}
                           </>
                         )}
                       </Button>
@@ -224,7 +234,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                   <SignInButton mode="modal">
                     <Button variant="outline" className="gap-2">
                       <LogInIcon className="size-4" />
-                      Sign in to comment
+                      {t("post.signInToComment")}
                     </Button>
                   </SignInButton>
                 </div>
